@@ -132,6 +132,49 @@ class Auth{
     /** <p>Remeember情報を削除</p>*/
     public static function clearRemember(){ Cookie::clear(Conf::REMEMBER_COOKIE_NAME); self::$tryRemember = true; }
 
+    
+    /** <p>2段階認証のキーを取得</p>*/
+    public static function get2fa_key(){
+        return Secure::toHash(session_id().Request::getRemoteAddr());
+    }
+    /** <p>2段階認証のトークンを取得</p>*/
+    public static function get2fa_token(array $login_param, $tokenLen = 5, $expire_min = 30){
+        $expire = strtotime(now()." +" . $expire_min . "min");
+        $token = Secure::genPassword($tokenLen, true, false, false);
+        $tfa = [
+            "key" => self::get2fa_key(),
+            "cerd" => $login_param,
+            "expire" => $expire,
+            "token" => $token,
+        ];
+        $_SESSION["auth_tfa"] = $tfa;
+        return $token;
+    }
+    /** <p>2段階認証のキーが有効か否か</p>*/
+    public static function valid2fa_key($tfa_key){
+        if(!isset($_SESSION["auth_tfa"]) || empty($_SESSION["auth_tfa"])){ return false; }
+        $tfa = $_SESSION["auth_tfa"];
+        if($tfa["expire"] >= time() && $tfa["key"] === $tfa_key){
+            return true;
+        }
+        return false;
+    }
+    /** <p>2段階認証のトークンが有効な場合、ログイン情報を返す</p>*/
+    public static function valid2fa_Token($tfa_key, $token){
+        if(!isset($_SESSION["auth_tfa"]) || empty($_SESSION["auth_tfa"])){
+            return null;
+        }
+        $tfa = $_SESSION["auth_tfa"];
+        if($tfa["expire"] >= time() && $tfa["key"] === $tfa_key && $tfa["token"] === $token){
+            $cert = $tfa["cerd"];
+            if(!empty($cert)){
+                unset($_SESSION["auth_tfa"]);
+                return $cert;
+            }
+        }
+        return null;
+    }
+    
     /** <p>ログイン中ユーザがロールを所持しているか判定。複数していの場合はいずれか１つ保持している場合はtrueを返す</p>*/
     public static function hasRole(... $roles){
         $user = self::getUser();
@@ -169,9 +212,11 @@ abstract class IAuthUser extends IData{
     /** <p>ロール取得処理のファンクションを記載してください。</p><p>例) return explode(',', $this->roles); </p> */
     abstract public function getRoles();
     
-    public function valid2FA(){ return false; }
+    /** <p>２段階認証の有無</p> */
+    public function is2fa(){ return false; }
 
     private $_authed = false;
+    private $_checked_2fa = false;
     
     /** <p><b>SQL_AUTH()</b>後のファンクションを記載してください。</p> */
     protected function after_auth(array $akey){}
@@ -204,7 +249,13 @@ abstract class IAuthUser extends IData{
             
             if(!$this->fetchData($akey)){ self::THROW_ERROR_REASON(); }
             
+            //2段階認証
+            if($this->_checked_2fa !== true && $this->is2fa()){
+                return true;
+            }
+            
             $this->_authed = true;
+            
             if(!Auth::login($akey, $this)){ self::THROW_ERROR_REASON(); }
             if($remember){ Auth::setRemember($cred, get_class($this)); }
             
@@ -213,6 +264,16 @@ abstract class IAuthUser extends IData{
             Log::error($ex);
         }
         $this->logout();
+        return false;
+    }
+    
+    public function login_2fa($tfa_key, $token){
+        $this->logout();
+        $cred = Auth::valid2fa_Token($tfa_key, $token);
+        if(!empty($cred)){
+            $this->_checked_2fa = true;
+            return $this->login($cred, false);
+        }
         return false;
     }
     

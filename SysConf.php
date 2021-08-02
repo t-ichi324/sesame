@@ -20,7 +20,9 @@ class SysConf {
     const DIR_CACHE_VIEW = "view";
     const DIR_CACHE_ROUTE = "route";
     const DIR_TMP_DOWNLOAD = "download";
+    const DIR_TMP_UPLOAD = "upload";
     
+    const FILE_CONTROLLER_DIRACCESS = "-access.php";
     const SUFFIX_CONTROLLER = "Controller";
     const SUFFIX_VIEW = ".html";
     const EXT_CONTROLLER = ".php";

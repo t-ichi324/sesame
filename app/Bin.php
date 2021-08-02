@@ -219,6 +219,9 @@ class HandleResolver{
         $r = empty(self::$class) ? \SysConf::DEFAULT_CLASS : self::$class;
         return \StringUtil::camelCase(str_replace('-', '_',  $r), true).\SysConf::SUFFIX_CONTROLLER;
     }
+    public static function getClassDir(){
+        return self::$dir;
+    }
     public static function getClassName(){
         $r = self::g2cn();
         if(\SysConf::USE_NAMESPACE && !empty(self::$dir)){ return str_replace(DIRECTORY_SEPARATOR, "\\", self::$dir).$r; }
@@ -236,6 +239,9 @@ class HandleResolver{
         if(!empty(self::$ext)) { $sfx = "_".self::$ext; }
         return $pfx.$func.$sfx;
         //$ns = get_class_methods(self::$class);
+    }
+    public static function getExt(){
+        return self::$ext;
     }
 }
 
@@ -375,7 +381,8 @@ class Handler{
                     }
                 }else{
                     if($func === "__id"){
-                        $r = $class->__id($callname);
+                        $id_name = $callname .(empty(HandleResolver::getExt()) ? "" : "." .HandleResolver::getExt()) ;
+                        $r = $class->__id($id_name);
                     }else{
                         $r = $class->$func($argument);
                     }
@@ -439,6 +446,8 @@ class Handler{
         \Meta::clear();
         if(file_exists($file)){
             try{
+                self::requireDirAccess();
+                
                 require_once $file;
                 if(class_exists($className)){
                     return new $className;
@@ -450,6 +459,18 @@ class Handler{
             }
         }
         return null;
+    }
+    private static function requireDirAccess(){
+        $bs = \Path::app(\SysConf::DIR_APP_CONTROLLER) . DIRECTORY_SEPARATOR;
+        $arr = explode(DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR. trim(HandleResolver::getClassDir(), DIRECTORY_SEPARATOR));
+        foreach ($arr as $v){
+            $bs .= $v.DIRECTORY_SEPARATOR;
+            $file = $bs.\SysConf::FILE_CONTROLLER_DIRACCESS;
+            if(file_exists($file)){
+                \HistoryStack::add("-access", $file);
+                require_once $file;
+            }
+        }
     }
     
     private static function getHandleFunc($class){

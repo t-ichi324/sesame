@@ -128,8 +128,6 @@ class Async{
 
 /**
  * 環境判断<br>
- * define('<b>ENV_FILE</b>') で指定したファイルの内容<br>
- * 存在しない場合は"real"と同義
  */
 class Env{
     private static $r = null;
@@ -163,6 +161,21 @@ class Env{
      * <b>ENV_FILE</b>の内容が、"dev"であるか
      */
     public static function isDev(){ return ("dev" == self::name()); }
+    
+    public static function timezone(){ return date_default_timezone_get(); }
+    public static function max_size_memory(){ return NumUtil::parse_size(ini_get("memory_limit")); }
+    public static function max_size_post(){
+        $max = self::max_size_memory();
+        $c = NumUtil::parse_size(ini_get("post_max_size"));
+        if($max > 0 && $c > $max){  $c = $max; }
+        return $c;
+    }
+    public static function max_size_uploads(){
+        $max = self::max_size_post();
+        $c = NumUtil::parse_size(ini_get("upload_max_filesize"));
+        if($max > 0 && $c > $max){  $c = $max; }
+        return $c;
+    }
 }
 
 /**
@@ -1075,10 +1088,11 @@ class Request {
     }
     
     public static function getBrowser(){
-        $browser = strtolower(self::getUserAgent());
-        return Util::getBrowserName($browser);
+        return UserAgentUtil::getBrowserName(self::getUserAgent());
     }
-    
+    public static function isMobile(){
+        return UserAgentUtil::isMobile(self::getUserAgent());
+    }
 }
 
 

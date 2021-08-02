@@ -19,28 +19,6 @@ class Util{
         }
         return str_replace($deny, $allow, $filename);
     }
-    
-    public static function getBrowserName($user_agent, $version = false){
-        $browser = strtolower($user_agent);
-        if (strstr($browser , 'edge')) {
-            $nm = 'Edge';
-        }elseif(strstr($browser , 'edg')){
-            echo('Edge(chromium)');
-        } elseif (strstr($browser , 'trident') || strstr($browser , 'msie')) {
-            $nm = 'IE';
-        } elseif (strstr($browser , 'chrome')) {
-            $nm = 'Chrome';
-        } elseif (strstr($browser , 'firefox')) {
-            $nm = 'Firefox';
-        } elseif (strstr($browser , 'safari')) {
-            $nm = 'Safari';
-        } elseif (strstr($browser , 'opera')) {
-            $nm = 'Opera';
-        } else {
-            $nm = '???';
-        }
-        return $nm;
-    }
 }
 
 /** <p>フラグ</p> */
@@ -307,6 +285,18 @@ class NumUtil{
         if($precision !== 0){ $c = 10 ** self::toInt($precision,1); return floor($f * $c) / $c; }
         return floor($f);
     }
+    
+    public static function parse_size($size){
+        if($size < 0){ return 0; }
+        $unit = preg_replace('/[^bkmgtpezy]/i', '', $size);
+        $size = preg_replace('/[^0-9\.]/', '', $size);
+        if ($unit) {
+            return round($size * pow(1024, stripos('bkmgtpezy', $unit[0])));
+        }
+        else {
+            return round($size);
+        }
+    }
 }
 
 /** <p>Url操作</p> */
@@ -449,6 +439,7 @@ class Path{
         }
         return $d->getFileInfo($filename)->fullName();
     }
+    
     public static function download_tmpfile(){
         $ms = explode('.',microtime(true))[1];
         $nm = "f".date('Ymdhis')."_".$ms.""."_".session_id().".tmp";
@@ -459,7 +450,23 @@ class Path{
         $nm = "f".date('Ymdhis')."_".$ms.""."_".session_id()."_tmp";
         return self::download($nm);
     }
-
+    
+    public static function upload($filename = null){
+        $d = new DirectoryInfo(self::tmp(SysConf::DIR_TMP_UPLOAD));
+        if(!$d->exists()){ $d->make(); }
+        $cdt = date('YmdHis', strtotime("-24 hour"));
+        foreach($d->getFilePaths() as $f){
+            $fdt = date('YmdHis', fileatime($f));
+            if($fdt < $cdt){
+                unlink($f);
+            }
+        }
+        if(StringUtil::isEmpty($filename)){
+            return $d->fullName();
+        }
+        return $d->getFileInfo($filename)->fullName();
+    }
+    
     /** <p>Pathを結合</p> */
     public static function combine(... $paths){
         $oi = array();
