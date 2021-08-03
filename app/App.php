@@ -1101,6 +1101,7 @@ class Response{
     private static $streamSpeed = null;
     private static $c_expires = 0;
     private static $ob_gzip = false;
+    private static $xoring = false;
 
     private static function result($key, array $head = null, $body = null){
         return array(
@@ -1128,14 +1129,8 @@ class Response{
     public static function setObGZip($bool){ self::$ob_gzip = $bool; }
     public static function getObGZip(){ return self::$ob_gzip; }
     
-    public static function accessCtrl_Allow($allow_oring = "*", $allow_method = "GET, OPTIONS"){
-        self::$_header["Access-Control-Allow-Origin"] = $allow_oring;
-        self::$_header["Access-Control-Allow-Methods"] = $allow_method;
-    }
-    public static function accessCtrl_Disallow(){
-        self::$_header["Access-Control-Allow-Origin"] = null;
-        self::$_header["Access-Control-Allow-Methods"] = null;
-    }
+    public static function setCrossOrign($allow){ self::$xoring = $allow; }
+    public static function getCrossOrign(){ return self::$xoring; }
     
     /** <p>namespaceを利用しない場合、同名クラスをロード時にエラーが発生する可能性があります。</p> */
     public static function foward($route, array $argument = null){

@@ -351,6 +351,11 @@ class Handler{
         $func = self::$funcName;
         $callname = HandleResolver::getFunc();
         try{
+            //IP Fillter
+            if(\Meta::is_filtered()){
+                throw new \ForbiddenException();
+            }
+            
             //pre function
             $pre = $class->__pre_invoke_handler($func, $callname);
             
@@ -649,6 +654,16 @@ class ResultResolver{
             header('Expires: -1');
             header('Cache-Control:');
             header('Pragma: no-cache');
+        }
+        
+        $xorign = \Response::getCrossOrign();
+        if($xorign){
+            $orign = "*";
+            if(isset($_SERVER["HTTP_ORIGIN"]) && !empty($_SERVER["HTTP_ORIGIN"])){ $orign = $_SERVER["HTTP_ORIGIN"]; }
+            header('Access-Control-Allow-Origin: '.$orign);
+            header("Access-Control-Allow-Credentials: true");
+            header("Access-Control-Allow-Methods: *");
+            header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
         }
         
         // クリックジャッキング対策(あまり意味ない)

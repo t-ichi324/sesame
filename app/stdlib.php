@@ -314,6 +314,11 @@ class Url{
         if(strstr($c, self::__SCHEME_DMT)){ return $c; }
         return self::combine(self::baseUrl(), $c);
     }
+    public static function relative(... $paths){
+        $c = self::combine(... $paths);
+        if(strstr($c, self::__SCHEME_DMT)){ return $c; }
+        return $c;
+    }
     
     public static function queryString($q){
         if(StringUtil::isEmpty($q)){return StringUtil::__EMPTY;}

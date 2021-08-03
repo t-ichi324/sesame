@@ -32,6 +32,7 @@ class RenderFunc extends IRenderFunc{
         if ($key === '@endeach' || $key === '@end-each'){
             return '<?php endforeach; ?>';
         }
+        
         if ($key === '@if'){
             return '<?php if('.$param.'): ?>';
         }
@@ -50,22 +51,22 @@ class RenderFunc extends IRenderFunc{
         if ($key === '@if-not-ajax'){
             return '<?php if(!Request::isAjax()): ?>';
         }
-        if ($key === '@require'){
-            return '<?php Render::echoRequire('.self::p2s($param).');?>';
-        }
-        if ($key === '@require-ajax'){
-            return '<?php if(Request::isAjax()){ Render::echoRequire('.self::p2s($param).'); } ?>';
-        }
-        if ($key === '@require-not-ajax'){
-            return '<?php if(!Request::isAjax()){ Render::echoRequire('.self::p2s($param).'); } ?>';
-        }
+        
+        //url
         if($key == '@uri'){
-            return '<?= htmlspecialchars(Request::getUri());?>';
+            if(empty($param)){
+                return '<?= htmlspecialchars(Request::getUri());?>';
+            }
+            return '<?= htmlspecialchars(Url::relative(Request::getUri(), '.self::p2s($param).'));?>';
         }
         if($key == '@url'){
-            return '<?= htmlspecialchars(Request::getUrl());?>';
+            if(empty($param)){
+                return '<?= htmlspecialchars(Request::getUrl());?>';
+            }
+            return '<?= htmlspecialchars(Url::get(Request::getUrl(), '.self::p2s($param).'));?>';
         }
         
+        //Layout
         if ($key === '@layout') {
             $p = explode(",", $param);
             if(count($p) === 1){
@@ -74,7 +75,6 @@ class RenderFunc extends IRenderFunc{
                 return '<?php if(!Request::isAjax()){ Render::setLayout('.self::p2s($p[0]).'); }else { Render::setLayout('.self::p2s($p[1]).'); }?>';
             }
         }
-        
         //section
         if ($key === '@section' || $key === '@sec') {
             return '<?php $__ob_key = '.self::p2s($param).';ob_start(); ?>';
@@ -85,15 +85,20 @@ class RenderFunc extends IRenderFunc{
         if ($key === '@section-yield' || $key === '@sec-yield' || $key === '@yield') {
             return '<?php Render::sectionYield('.self::p2s($param).');?>';
         }
-        
-        if ($key == '@file'){
-            return '<?php if(file_exists('.self::p2s($param).')){ readfile('.self::p2s($param).'); } ?>';
+
+        //require
+        if ($key === '@require'){
+            return '<?php Render::echoRequire('.self::p2s($param).');?>';
         }
-        if ($key == '@file-br'){
-            return '<?php if(file_exists('.self::p2s($param).')){ \$__fg = fopen('.self::p2s($param).', "r"); while(!feof(\$__fg)){ echo htmlspecialchars(fgets(\$__fg)).<br>; } fclose(\$__fg); } ?>';
+        if ($key === '@require-ajax'){
+            return '<?php if(Request::isAjax()){ Render::echoRequire('.self::p2s($param).'); } ?>';
+        }
+        if ($key === '@require-not-ajax'){
+            return '<?php if(!Request::isAjax()){ Render::echoRequire('.self::p2s($param).'); } ?>';
         }
         
         // [:] META cuntions
+        //require
         if ($key === ':require'){
             return '<?php Render::echoRequire(Meta::get_vprefix('.self::p2s($param).'));?>';
         }
@@ -103,6 +108,8 @@ class RenderFunc extends IRenderFunc{
         if ($key === ':require-not-ajax'){
             return '<?php if(!Request::isAjax()){ Render::echoRequire(Meta::get_vprefix('.self::p2s($param).')); } ?>';
         }
+        
+        
         if($key == ':title'){
             return "<?= htmlspecialchars(Meta::get_title());?>";
         }
@@ -129,6 +136,7 @@ class RenderFunc extends IRenderFunc{
         if ($key === '*each-list'){
             return '<?php foreach(FormEcho::getList() as '.$param.'): ?>';
         }
+        
         if ($key === '*list-detail'){
             if(empty($param)){
                 return '<?= FormEcho::listDetail(); ?>';
@@ -166,6 +174,13 @@ class RenderFunc extends IRenderFunc{
         //query
         if (mb_substr($key,0, 1) === "?"){ return '<?= Url::queryString('.self::p2s($key).');?>'; }
         
+        // Add
+        if ($key == '@file'){
+            return '<?php if(file_exists('.self::p2s($param).')){ readfile('.self::p2s($param).'); } ?>';
+        }
+        if ($key == '@file-br'){
+            return '<?php if(file_exists('.self::p2s($param).')){ \$__fg = fopen('.self::p2s($param).', "r"); while(!feof(\$__fg)){ echo htmlspecialchars(fgets(\$__fg)).<br>; } fclose(\$__fg); } ?>';
+        }
         
         return '<?= htmlspecialchars('.mb_substr($key, 1).$param.');?>';
     }

@@ -4,6 +4,7 @@ class Meta{
     //@ sys
     private static $_vprefix = null;
     private static $_breadcrumb = array();
+    private static $_breadcrumb_show = true;
     private static $_header = array();
     private static $_vd_csrf = false;
     private static $_vd_roles = null;
@@ -15,12 +16,15 @@ class Meta{
     private static $_og_image;
     private static $_robots;
     
+    private static $_filter = array();
+    
     //@ mao
     private static $_content_map = array();
 
     public static function clear(){ 
         self::$_vprefix = null;
         self::$_breadcrumb = array();
+        self::$_breadcrumb_show = true;
         self::$_vd_csrf = null;
         self::$_vd_roles = null;
         self::$_header = array();
@@ -32,6 +36,9 @@ class Meta{
         self::$_desc = null;
         self::$_og_image = null;
         self::$_robots = null;
+        
+        self::$_filter = array();
+        
         self::$_content_map = array();
     }
     
@@ -122,7 +129,45 @@ class Meta{
      */
     public static function is_valid_csrf(){ return self::$_vd_csrf; }
 
-    
+
+    public static function filter_allow($ip){
+        if(is_array($ip)){
+            foreach ($ip as $v){ self::filter_allow($v); }
+        }elseif(is_string($ip)){
+            foreach(explode("\n", $ip) as $v){
+                $t = trim($v);
+                if($t != ""){
+                    self::$_filter["a"][] = $t;
+                }
+            }
+        }
+    }
+    public static function filter_deny($ip){
+        if(is_array($ip)){
+            foreach ($ip as $v){ self::filter_deny($v); }
+        }elseif(is_string($ip)){
+            foreach(explode("\n", $ip) as $v){
+                $t = trim($v);
+                if($t != ""){
+                    self::$_filter["d"][] = $t;
+                }
+            }
+        }
+    }
+    public static function clear_filter(){ self::$_filter = array(); }
+    public static function is_filtered(){
+        $ip = Request::getRemoteAddr();
+        $def = false;
+        if(isset(self::$_filter["d"])){
+            if(in_array($ip, self::$_filter["d"])){ return true; }
+        }
+        if(isset(self::$_filter["a"])){
+            $def = true;
+            if(in_array($ip, self::$_filter["a"])){ return false; }
+        }
+        return $def;
+    }
+
     /**
      * <b>[ Sys / Meta ]</B><br>
      * パンくずの階層にタイトルとURLを追加します。
@@ -142,6 +187,9 @@ class Meta{
      */
     public static function get_breadcrumb(){ return self::$_breadcrumb; }
     public static function clear_breadcrumb(){ self::$_breadcrumb = array(); }
+
+    public static function breadcrumb_show($bool){ self::$_breadcrumb_show = $bool; }
+    public static function is_breadcrumb_show(){ return (self::$_breadcrumb_show === true); }
 
     /**
      * <b>[ Sys / Meta ]</B><br>
