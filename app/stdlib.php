@@ -8,19 +8,6 @@ function h($string){ return htmlspecialchars($string, ENT_QUOTES, 'UTF-8'); }
 function base64url_encode($data){ return rtrim(strtr(base64_encode($data), '+/', '-_'), '='); } 
 function base64url_decode($data){ return base64_decode(str_pad(strtr($data, '-_', '+/'), strlen($data) % 4, '=', STR_PAD_RIGHT)); }
 
-
-class Util{
-    /** <p>ファイルネーム正規化</p> */
-    public static function fileNameNormalizer($filename, $urlencode = true){
-        $deny = array("\\","/",":","*","?","\"","<",">","|");
-        $allow = array("￥","／","：","＊","？","”","＜","＞","｜");
-        if($urlencode){
-            return rawurlencode(str_replace($deny, $allow, $filename));
-        }
-        return str_replace($deny, $allow, $filename);
-    }
-}
-
 /** <p>フラグ</p> */
 class Flags{
     /** <p>フラグ固定値 : 1</p> */
@@ -239,6 +226,16 @@ class StringUtil{
         if(self::isEmpty($param)){ return $default; }
         $s = self::toString($param);
         return "'".str_replace("\\", "\\\\", str_replace("\n", "\\n", str_replace("\t", "\\t", str_replace("'", "''", $s))))."'";
+    }
+    
+    /** <p>ファイルネーム正規化</p> */
+    public static function fileNameNormalizer($filename, $urlencode = true){
+        $deny = array("\\","/",":","*","?","\"","<",">","|");
+        $allow = array("￥","／","：","＊","？","”","＜","＞","｜");
+        if($urlencode){
+            return rawurlencode(str_replace($deny, $allow, $filename));
+        }
+        return str_replace($deny, $allow, $filename);
     }
 }
 
@@ -552,7 +549,7 @@ class DirectoryInfo extends __IO_Info{
         $ret = array();
         if(!$this->exists()){ return $ret; }
         if(StringUtil::isEmpty($ptrns)){
-            foreach(glob($this->full.DIRECTORY_SEPARATOR."*", GLOB_BRACE) as $f){ if(is_file($f)){ $ret[] = $f;} }
+            foreach(glob($this->full.DIRECTORY_SEPARATOR."{*,.[!.]*,..?*}", GLOB_BRACE) as $f){ if(is_file($f)){ $ret[] = $f;} }
         }else{
             foreach($ptrns as $p){
                 foreach(glob($this->full.DIRECTORY_SEPARATOR.$p, GLOB_BRACE) as $f){ if(is_file($f)){ $ret[] = $f;} }
@@ -588,10 +585,10 @@ class DirectoryInfo extends __IO_Info{
         $ret = array();
         if(!$this->exists()){ return $ret; }
         if(StringUtil::isEmpty($ptrns)){
-            foreach(glob($this->full.DIRECTORY_SEPARATOR."*", GLOB_ONLYDIR) as $f){ if(is_dir($f)){ $ret[] = $f;} }
+            foreach(glob($this->full.DIRECTORY_SEPARATOR."{*,.[!.]*,..?*}", GLOB_BRACE | GLOB_ONLYDIR) as $f){ if(is_dir($f)){ $ret[] = $f;} }
         }else{
             foreach($ptrns as $p){
-                foreach(glob($this->full.DIRECTORY_SEPARATOR.$p, GLOB_ONLYDIR) as $f){ if(is_dir($f)){ $ret[] = $f;} }
+                foreach(glob($this->full.DIRECTORY_SEPARATOR.$p, GLOB_BRACE | GLOB_ONLYDIR) as $f){ if(is_dir($f)){ $ret[] = $f;} }
             }
         }
         return $ret;

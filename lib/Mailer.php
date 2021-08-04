@@ -68,7 +68,7 @@ class Mailer{
         try{
             $dir = new DirectoryInfo(Path::tmp("email"));
             $dir->make();
-            $name =  Util::fileNameNormalizer(now_fileName()."_".$toAddress,false).".log";
+            $name = StringUtil::fileNameNormalizer(now_fileName()."_".$toAddress,false).".log";
             $saveTo = Path::combine($dir->fullName(), $name);
             
             $t = "ATTR: ".$attr."\n\n";

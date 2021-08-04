@@ -1155,7 +1155,7 @@ class Response{
 
     public static function text($value, $contentType="text/plain", $charset = "utf-8"){
         $head[] = "Content-type: {$contentType}; charset={$charset}";
-        $head[] = 'Content-disposition: filename*='.$charset.'\'\''. Util::fileNameNormalizer(Request::getBasename());
+        $head[] = 'Content-disposition: filename*='.$charset.'\'\''. StringUtil::fileNameNormalizer(Request::getBasename());
         if(is_array($value) || is_object($value)){
             return self::result(SysConf::RES_I_TEXT, $head, json_encode($value));
         }else{
@@ -1168,7 +1168,7 @@ class Response{
         if(empty($mime)){ $mime = ContentsResolve::getMimeType($fileName); }
         $head[] = 'Content-Type: '.$mime." charset={$charset}";
         $head[] = 'X-Content-Type-Options: nosniff';
-        $head[] = 'Content-disposition: attachment; filename*=UTF-8\'\''.Util::fileNameNormalizer($fileName);
+        $head[] = 'Content-disposition: attachment; filename*=UTF-8\'\''.StringUtil::fileNameNormalizer($fileName);
         $head[] = 'Connection: close';
         if(is_array($value) || is_object($value)){
             return self::result(SysConf::RES_I_TEXT, $head, json_encode($value));
@@ -1191,7 +1191,7 @@ class Response{
             if(empty($mime)){ $mime = ContentsResolve::getMimeType($fileName); }
             $head[] = 'Content-Type: '.$mime;
             $head[] = 'Content-Length: '.filesize($filePath);
-            $head[] = 'Content-disposition: filename*=UTF-8\'\''.Util::fileNameNormalizer($fileName);
+            $head[] = 'Content-disposition: filename*=UTF-8\'\''.StringUtil::fileNameNormalizer($fileName);
             return self::result(SysConf::RES_I_FILE, $head, $filePath);
         }
         return self::fileNotfound();
@@ -1207,7 +1207,7 @@ class Response{
             $head[] = 'Content-Type: '.$mime;
             $head[] = 'Content-Length: '.filesize($filePath);
             $head[] = 'X-Content-Type-Options: nosniff';
-            $head[] = 'Content-disposition: attachment; filename*=UTF-8\'\''.Util::fileNameNormalizer($fileName);
+            $head[] = 'Content-disposition: attachment; filename*=UTF-8\'\''.StringUtil::fileNameNormalizer($fileName);
             $head[] = 'Connection: close';
             return self::result(SysConf::RES_I_FILE, $head, $filePath);
         }
@@ -1218,7 +1218,7 @@ class Response{
         if(file_exists($filePath)){
             if(empty($fileName)) { $fileName = Request::getBasename(); }
             $head[] = 'Content-Type: application/octet-stream';
-            $head[] = 'Content-disposition: attachment; filename*=UTF-8\'\''.Util::fileNameNormalizer($fileName);
+            $head[] = 'Content-disposition: attachment; filename*=UTF-8\'\''.StringUtil::fileNameNormalizer($fileName);
             $head[] = 'Expires: 0';
             $head[] = 'Cache-Control: must-revalidate';
             $head[] = 'Pragma: public';
