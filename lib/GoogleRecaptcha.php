@@ -1,20 +1,21 @@
 <?php
 /***
+ * 事前にGoogle Recaptchaにサイトを登録してください。
  * https://www.google.com/recaptcha/about/
  * 
  * HTML -----------
     <script src='https://www.google.com/recaptcha/api.js'></script>
     <form>
-        <div class="g-recaptcha" data-sitekey="***-***"></div>
+        <div class="g-recaptcha" data-sitekey="[***-***]"></div>
         <button type="submit">SUBMIT</button>
     </form>
 
  * PHP ------------
-    $key = "***_***";
-    $log = Path::tmp("log", "GoogleRecaptcha.log");
+    $key = "[***-***]";
+    $log = __DIR__ . "/GoogleRecaptcha.log";
     $code = GoogleRecaptcha::valid($key, $log);
-    if($code === 1){ Message::addError("reCAPTCHAをチェックしてください");  return ""; }
-    if($code === 2){ Message::addError("reCAPTCHA認証エラー"); return ""; }
+    if($code === 1){ echo("reCAPTCHAをチェックしてください");  return ""; }
+    if($code === 2){ echo("reCAPTCHA認証エラー"); return ""; }
 
  */
 class GoogleRecaptcha {
