@@ -1,6 +1,6 @@
 <?php
 /**
- * @version "sesame-2.x"
+ * https://github.com/t-ichi324/sesame
  * 
 REQUIRED PKG(Ubuntu)
 sudo apt-get install mbstring

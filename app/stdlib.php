@@ -469,6 +469,22 @@ class Path{
         return $d->getFileInfo($filename)->fullName();
     }
     
+    /** <p>正規化</p> */
+    public static function normalize($path){
+        $hie = array();
+        $trm = trim(str_replace("\\", "/", $path));
+        $pre = "";
+        for($i = 0; $i < strlen($trm); $i++) { if($trm[$i] !== "/"){ break; } $pre .= "/"; }
+        $trm = trim($trm, "/");
+        $arr = explode("/", $trm);
+        foreach($arr as $p){
+            if($p === "" || $p === "."){ continue; }
+            if($p === ".."){ array_pop($hie); continue; }
+            $hie[] = $p;
+        }
+        return $pre . implode(DIRECTORY_SEPARATOR, $hie);
+    }
+    
     /** <p>Pathを結合</p> */
     public static function combine(... $paths){
         $oi = array();

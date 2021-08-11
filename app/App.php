@@ -4,7 +4,13 @@
  * @version "sesame-2.x"
  */
 /** ExceptionのラッパーClass. */
-abstract class IException extends Exception{abstract public function statusCode(); }
+abstract class IException extends Exception{
+    abstract public function statusCode();
+    public function __construct(string $message = "", int $code = 0, \Throwable $previous = null) {
+        Response::setStatusCode($this->statusCode());
+        parent::__construct($message, $code, $previous);
+    }
+}
 /** コンテンツが存在しない. */
 class NoContentException extends IException{public function statusCode(){return 204;}}
 /** リクエストが不正である. */
