@@ -14,6 +14,17 @@ class Auth{
         return self::tryRemember();
     }
     
+    public static function setKey($key, $value, $update_remember = true){
+        $arr = self::getKey();
+        if(!empty($arr)){
+            $arr[$key] = $value;
+            $_SESSION[SysConf::SESSION_AUTH_NAME."@key"] = $arr;
+            if($update_remember){
+                self::updateRemember($key, $value);
+            }
+        }
+    }
+    
     /** <p>認証中の<b>IAuthUser継承インスタンス</b>を取得</p><p>またRequest毎に1回<b>IAuthUser::SQL_FETCH</b>を実行して内容が更新する</p> */
     public static function getUser(){
         $key = self::getKey();
@@ -34,6 +45,13 @@ class Auth{
         if($user === null) { return $nullVal; }
         if($user instanceof IAuthUser){ return $user->getVal($key, $nullVal);}
         return $nullVal; 
+    }
+    
+    public static function get($key = null, $nullVal){
+        if(func_num_args() > 0){
+            return self::getVal($key, $nullVal);
+        }
+        return self::getUser();
     }
     
     /** <p>認証中ユーザかの判定<p> */
@@ -124,7 +142,7 @@ class Auth{
             $cl = $rem["cl"];
             $params = $rem["cred"];
             if(class_exists($cl) && !empty($params)){
-                if(isset($params[$credKey])){ $params[$credKey] = $value; }
+                $params[$credKey] = $value;
                 self::setRemember($params, $cl);
             }
         }

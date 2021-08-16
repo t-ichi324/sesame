@@ -142,7 +142,9 @@ class Env{
      */
     public static function name(){
         if(self::$r === null){
-            if(defined("ENV_FILE") && is_file(ENV_FILE)){ self::$r = strtolower(str_replace("\n", '', file_get_contents(ENV_FILE))); }
+            if(defined("ENV_FILE") && is_file(ENV_FILE)){
+                self::$r = trim(explode("\n", file_get_contents(ENV_FILE))[0]);
+            }
             if(empty(self::$r)){ self::$r = "real";}
         }
         return self::$r;
@@ -166,7 +168,7 @@ class Env{
     /** 
      * <b>ENV_FILE</b>の内容が、"dev"であるか
      */
-    public static function isDev(){ return ("dev" == self::name()); }
+    public static function isDev(){ return ("dev" == self::name());  }
     
     public static function timezone(){ return date_default_timezone_get(); }
     public static function max_size_memory(){ return NumUtil::parse_size(ini_get("memory_limit")); }
