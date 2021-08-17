@@ -61,13 +61,20 @@ class DbQuery extends \DB\DatabaseIO{
      * @return Chainable
      */
     public function table($name, $alias = null){
+        if($name instanceof DbQuery){ return $this->table_DbQuery($name, $alias); }
+        if(is_object($name)){ return $this->table_Entity($name, $alias); }
+        
+        return $this->_tblname($name, $alias);
+    }
+    private function _tblname($name, $alias){
         $this->table = self::BQ($name, true);
         if(!empty($alias)){
             $this->table .= " ".self::BQ($alias);
         }
         return $this;
     }
-    
+
+
     /**
      * <b>[ Table指定 ]</B><br>
      * DbQueryを結合
@@ -81,7 +88,7 @@ class DbQuery extends \DB\DatabaseIO{
         if(isset($query[self::$_QRY_BIND]) && is_array($query[self::$_QRY_BIND])){
             foreach($query[self::$_QRY_BIND] as $v){ $this->where_binds[] = $v; }
         }
-        return $this->table("(".$sql.")", $alias);
+        return $this->_tblname("(".$sql.")", $alias);
     }
     /**
      * <b>[ Table指定 ]</B><br>
@@ -101,7 +108,7 @@ class DbQuery extends \DB\DatabaseIO{
         }else{
             $n = $class_name;
         }
-        return $this->table($n, $alias);
+        return $this->_tblname($n, $alias);
     }
     
     /**
