@@ -63,7 +63,7 @@ class DbXml extends \DB\DatabaseIO{
         $xml = $this->_GET_XML($filename);
         $xp = self::$TAG_SQL . ' [@'.self::$ATTR_KEY.'="'.$sqlkey.'"]';
         $find = $xml->xpath($xp);
-        if(empty($find)){ throw new \Exception('could not found xpath "'.$xp.'" in "'.$path.'".'); }
+        if(empty($find)){ throw new \Exception('could not found xpath "'.$xp.'" in "'.$filename.'".'); }
         return $find[0];
     }
     

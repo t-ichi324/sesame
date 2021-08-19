@@ -9,7 +9,15 @@ class Auth{
     public static function getSessionId(){ return session_id(); }
     
     /** <p>認証中の<b>IAuthUser::SQL_AUTH</b>結果の連想配列を取得</p> */
-    public static function getKey(){
+    public static function getKey($key = null){
+        $map = self::gkeymap();
+        if($key == null){ return $map; }
+        if(!empty($map) && isset($map[$key])){
+            return $map[$key];
+        }
+        return null;
+    }
+    private static function gkeymap(){
         if(isset($_SESSION[SysConf::SESSION_AUTH_NAME."@key"])){ return $_SESSION[SysConf::SESSION_AUTH_NAME."@key"]; }
         return self::tryRemember();
     }
@@ -47,8 +55,8 @@ class Auth{
         return $nullVal; 
     }
     
-    public static function get($key = null, $nullVal){
-        if(func_num_args() > 0){
+    public static function get($key = null, $nullVal = null){
+        if($key !== null){
             return self::getVal($key, $nullVal);
         }
         return self::getUser();
