@@ -91,6 +91,8 @@ class StringUtil{
     /** <p>後方にパッディングを挿入</p> */
     public static function padRight($str, $len, $padChar = ' '){ return (str_pad(self::toString($str), $len, $padChar, STR_PAD_RIGHT) === false); }
     
+    public static function ellipsis($str, $max, $sym = "..."){if(self::length($str) > $max){ return self::left($str, $max).$sym; } return $str;}
+    
     /** <p>文字を置換する</p> */
     public static function replace($str, $search, $replace){
         return str_replace($search, $replace, self::toString($str));

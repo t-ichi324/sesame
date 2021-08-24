@@ -81,8 +81,12 @@ class FormEcho{
         return $re;
     }
     
-    public static function text($name){
-        echo htmlspecialchars(self::get($name));
+    public static function text($name, $length = 0){
+        if($length > 0){
+            echo htmlspecialchars(StringUtil::left(self::get($name), $length));
+        }else{
+            echo htmlspecialchars(self::get($name));
+        }
     }
     
     public static function multiLine($name, $tag = "p", $class=""){

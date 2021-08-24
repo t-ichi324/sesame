@@ -282,14 +282,14 @@ class Meta{
      * OG:IMAGEの設定
      * @param string $url
      */
-    public static function image($url){ self::$_img = $url; }
+    public static function image($url){ self::$_og_image = $url; }
     
     /**
      * <b>[ Meta ]</B><br>
      * OG:IMAGEの取得
      * @return string
      */
-    public static function get_image(){ return self::$_img; }
+    public static function get_image(){ return self::$_og_image; }
 }
 
 class Sitemap {
